@@ -5,20 +5,29 @@
 #include <powerConstants.h>
 #include <Servo.h>
 
-int sunset = 6;// gradusi
-int sunrise = 7;// можно оставить только один
+int sunset = 6;// grad
+int sunrise = 7;//
 
-int relay_pin = 2;// digital 2
+// settings time
+uint32_t timeSleepNight = 1000; // Sleep time without sun in ms recommended value 3600000 
+uint32_t timeSleepDay = 1000;// Sleep time in the sun in ms recommended value 300000
+uint32_t delayServoRotation = 300; // Delay time for servo rotation in ms, for MG995 im use 300 ms
+
+// settings position
+double LON = 27.5;//  Minsk +27,5
+double lat = 53.91; // Minsk lat = 53,91
+int GTM = 3; // Minsk +3 
+
+// settings pins
+int relay_pin = 2;// digital 2 transistor
 int servo_x_pin = 5;// digital 5
 int servo_y_pin = 6;
 const int buttonSettingPin = 8;
 const int buttonPlusPin = 7;
 const int buttonInerruptPin = 3;
-const double LON = 27.5;// !!!!!!!!!!!!!! Minsk +27,5
-const double lat = 53.91; // Minsk lat = 53,91
-const int GTM = 3; // Minsk +3 то же самое, что и время по Гринвичу&&&&&
 
-iarduino_RTC watch(RTC_DS1302, 11, 13, 12); //rst clk dat
+iarduino_RTC watch(RTC_DS1302, 11, 13, 12); //Pins: 11 - rst, 12 - clk, 13 - dat
+
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 EncButton<EB_TICK, buttonSettingPin> buttonSetting;
 EncButton<EB_TICK, buttonPlusPin> buttonPlus;
@@ -83,15 +92,16 @@ void tern_servo() {
 
   if (a_ltitude < sunset && a_ltitude < sunrise) { // night
 
-    power.sleepDelay(1000);// 3600000
+    power.sleepDelay(timeSleepNight);// 3600000
   } else {
     relay_flag = true;
     digitalWrite(relay_pin, relay_flag);
     servo_x.write(azimuth);
     servo_y.write(a_ltitude);
+    delay(delayServoRotation);// время задержки для поворота серво
     relay_flag = !relay_flag;
     digitalWrite(relay_pin, relay_flag);
-    power.sleepDelay(1000);//300000
+    power.sleepDelay(timeSleepDay);//300000
   }
 }
 
